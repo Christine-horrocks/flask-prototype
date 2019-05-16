@@ -11,12 +11,9 @@ app.config.from_object(Config)
 
 @app.route('/')
 def index():
-    print(current_app.config)
     resp = requests.get(current_app.config['SCHEMA_API_URL'])
     resp.raise_for_status()
-    print(resp.json())
     schemas = [schema['name'] for schema in resp.json()]
-    print(schemas)
     return render_template('index.html', schemas=schemas)
 
 
