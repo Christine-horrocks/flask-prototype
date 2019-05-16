@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <ul>
+        {% for schema in schemas %}
+            {% set schema_name = schema | replace('-schema.json', '') %}
+            <li>
+                <a href="{{url_for('dynamic_form', schema=schema_name)}}">{{ schema_name }}</a>
+            </li>
+
+        {% endfor %}
+    </ul>
+</body>
+</html>
