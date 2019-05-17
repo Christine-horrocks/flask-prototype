@@ -1,9 +1,9 @@
 import requests
 
 from flask import Flask, render_template, current_app
-from flask_wtf import FlaskForm
-from wtforms import StringField, DateField
+from wtforms import StringField, DateField, validators
 from application.config import Config
+from application.forms import formfactory
 
 
 app = Flask(__name__)
@@ -20,17 +20,9 @@ def index():
 @app.route('/<schema>')
 def dynamic_form(schema):
 
-    from application.forms import DynamicForm
-    from application.forms import fields
-
     schema_url = f"{current_app.config['SCHEMA_URL']}/{schema}-schema.json"
     schema_json = requests.get(schema_url).json()
+    form = formfactory(schema_json)
 
-    for field in schema_json.get('fields'):
-        field_type = fields.get(field.get('type'))
-        if field_type is not None:
-            f = field_type(field['title'])
-            setattr(DynamicForm, field['title'].lower().replace(' ', '-'), f)
-            form = DynamicForm()
-
+    # TODO work out where form posts to and pass to template
     return render_template('dynamicform.html', form=form)

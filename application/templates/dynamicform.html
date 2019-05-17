@@ -5,10 +5,14 @@
     <title>Test dynamic form</title>
 </head>
 <body>
-    <ul>
+    <form action="#" method="get" accept-charset="utf-8">
+        <ul>
         {% for field in form %}
-            <li>{{ field.name }} {{ field }}</li>
+            <li>{{ field.label }} {{ field }}</li>
         {% endfor %}
     </ul>
+    <input type="submit" name="save">
+    </form>
+
 </body>
 </html>
