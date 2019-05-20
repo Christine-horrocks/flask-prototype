@@ -1,6 +1,6 @@
 import requests
 
-from flask import Flask, render_template, current_app
+from flask import Flask, render_template, current_app, url_for, request, redirect
 from wtforms import StringField, DateField, validators
 from application.config import Config
 from application.forms import formfactory
@@ -26,3 +26,11 @@ def dynamic_form(schema):
 
     # TODO work out where form posts to and pass to template
     return render_template('dynamicform.html', form=form)
+
+
+@app.route('/handler', methods=['POST'])
+def handle_form():
+
+    print(request.form)
+
+    return redirect(url_for('.index'))
