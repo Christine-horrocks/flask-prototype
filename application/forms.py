@@ -7,13 +7,13 @@ from wtforms.fields.html5 import DateField
 # TODO create more mappings for types to wtforms fields
 types_to_form_fields = {'string': StringField, 'date': DateField}
 
-class DynamicForm(FlaskForm):
-
-    def __init__(self):
-        super().__init__()
-
 
 def formfactory(schema):
+
+    class DynamicForm(FlaskForm):
+
+        def __init__(self, **kwargs):
+            super().__init__(**kwargs)
 
     for field in schema.get('fields'):
         form_field = types_to_form_fields.get(field.get('type'))
@@ -26,4 +26,4 @@ def formfactory(schema):
             f = form_field(field['title'], validators=validators)
             setattr(DynamicForm, field['name'], f)
 
-    return DynamicForm()
+    return DynamicForm

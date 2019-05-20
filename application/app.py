@@ -17,20 +17,21 @@ def index():
     return render_template('index.html', schemas=schemas)
 
 
-@app.route('/<schema>')
+@app.route('/<schema>', methods=['GET', 'POST'])
 def dynamic_form(schema):
 
     schema_url = f"{current_app.config['SCHEMA_URL']}/{schema}-schema.json"
     schema_json = requests.get(schema_url).json()
-    form = formfactory(schema_json)
+    form_object = formfactory(schema_json)
 
-    # TODO work out where form posts to and pass to template
-    return render_template('dynamicform.html', form=form)
+    if request.method == 'POST':
+        form = form_object(obj=request.form)
+        if form.validate():
+            print('form is good!')
+            print(form.data)
+            # DO something with the data
+            return redirect(url_for('.index'))
+    else:
+        form = form_object()
 
-
-@app.route('/handler', methods=['POST'])
-def handle_form():
-
-    print(request.form)
-
-    return redirect(url_for('.index'))
+    return render_template('dynamicform.html', form=form, schema=schema)
