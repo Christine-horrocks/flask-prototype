@@ -1,0 +1,22 @@
+{
+  "name": "dynamic-forms",
+  "version": "1.0.0",
+  "description": "pip install -r requirements.txt",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ashimali/dynamic-forms.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ashimali/dynamic-forms/issues"
+  },
+  "homepage": "https://github.com/ashimali/dynamic-forms#readme",
+  "dependencies": {
+    "govuk-frontend": "^2.11.0"
+  }
+}

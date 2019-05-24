@@ -1,11 +1,11 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField
+from wtforms import StringField, DecimalField
 from wtforms.validators import DataRequired
 from wtforms.fields.html5 import DateField
 
 
 # TODO create more mappings for types to wtforms fields
-types_to_form_fields = {'string': StringField, 'date': DateField}
+types_to_form_fields = {'string': StringField, 'date': DateField, 'number': DecimalField}
 
 
 def formfactory(schema):
