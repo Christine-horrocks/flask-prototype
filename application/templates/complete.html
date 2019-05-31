@@ -1,5 +1,20 @@
 {% extends "base.html" %}
+
+{% block title %}Your entry has been added{% endblock %}
+
 {% block body %}
-    <p>Here is the data</p>
-    <p>{{ data }}</p>
+
+    <div>
+        <h1 class="govuk-heading-xl">{{ title }}</h1>
+    </div>
+
+    <p class="govuk-body">Here is the data</p>
+    <ul class="govuk-list">
+        {% for data_item in data %}
+        <li>
+            {{ data_item }}
+        </li>
+         {% endfor %}
+    </ul>
+
 {% endblock %}

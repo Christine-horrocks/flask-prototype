@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, DecimalField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Optional, URL, Email
 from wtforms.fields.html5 import DateField
 
 
@@ -20,10 +20,33 @@ def formfactory(schema):
         if form_field is not None:
             constraints = field.get('constraints')
             validators = []
+            if field.get('format') is not None:
+                validators.append(type_validators(field.get('format')))
             if constraints.get('required'):
-                validators.append(DataRequired())
+                validators.append(DataRequired(message="This field is required"))
+            else:
+                validators.append(Optional(strip_whitespace=True))
             # TODO create mappings constraints to validators to user here and append to list
+            print(validators)
             f = form_field(field['title'], validators=validators)
             setattr(DynamicForm, field['name'], f)
 
     return DynamicForm
+
+def type_validators(type):
+    if type is not None:
+        return {
+            "uri" : URL(message="This is not a valid URL"),
+            "email" : Email(message="This is not a valid email address")
+        }[type]
+
+def validators_builder(self, field):
+    constraints = field.get('constraints')
+    validators = []
+    if field.get('format') is not None:
+        validators.append(type_validators(self, field.get('format')))
+    if constraints.get('required'):
+        validators.append(DataRequired(message="This field is required"))
+    else:
+        validators.append(Optional(strip_whitespace=True))
+    return validators
