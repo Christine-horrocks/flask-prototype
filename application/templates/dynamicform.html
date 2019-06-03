@@ -13,16 +13,31 @@
     </div>
 
     <form action="{{ url_for('frontend.dynamic_form', schema=schema) }}" method="post" accept-charset="utf-8">
+
         <ul class="govuk-list">
-        {% for field in form %}
-            {% if field.type == "CSRFTokenField" %}
-                {{ field }}
-            {% else %}
-                <li class="govuk-link">{{ field.label }} {{ field }} {% if field.flags.required %}*{% endif %}</li>
-            {% endif %}
-        {% endfor %}
-    </ul>
-    <input type="submit" name="save" class="govuk-button">
+            {% for field in form %}
+                {% if field.type == "CSRFTokenField" %}
+                    {{ field }}
+                {% else %}
+
+                    {% if field.errors %}
+                        <ul class="errors">
+                            {% for error in field.errors%}
+                                <li class="govuk-error-message">{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+
+                    <li {% if field.errors %}
+                            class="govuk-input govuk-input--error"
+                        {% else %}
+                            class="govuk-link"
+                        {% endif %}
+                    >{{ field.label }} {{ field }} {% if field.flags.required %}*{% endif %}</li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+        <input type="submit" name="save" class="govuk-button">
     </form>
 
 </div>

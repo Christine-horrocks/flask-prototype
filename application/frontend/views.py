@@ -26,6 +26,7 @@ def dynamic_form(schema):
     title = clean_file_name.replace('-', ' ').capitalize()
     schema_json = requests.get(schema_url).json()
     form_object = formfactory(schema_json)
+    session['schema_json'] = schema_json
 
     if request.method == 'POST':
         form = form_object(obj=request.form)
@@ -51,6 +52,8 @@ def check():
             data_list.append([key, y])
 
     return render_template('check.html', data=data_list, title=title)
+
+
 
 @frontend.route('/complete')
 def complete():
