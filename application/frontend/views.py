@@ -1,8 +1,10 @@
-
 import simplejson as simplejson
 import json
 import requests
 import csv
+import re
+import datetime
+from datetime import date
 from flask import Blueprint, session
 from flask import render_template, current_app, url_for, request, redirect
 from application.forms import formfactory
@@ -27,12 +29,13 @@ def dynamic_form(schema):
     schema_json = requests.get(schema_url).json()
     form_object = formfactory(schema_json)
     session['schema_json'] = schema_json
+    session['schema'] = schema
 
     if request.method == 'POST':
         form = form_object(obj=request.form)
-        print("form is present")
+        print("Dynamic form is present")
         if form.validate():
-            print("form is valid!!!!!!!!!!!!!!!")
+            print("Dynamic form is valid!!!!!!!!!!!!!!!")
             session['form_data'] = simplejson.dumps(form.data, default=str)
             session['file_name'] = clean_file_name
             return redirect(url_for('.check'))
@@ -40,6 +43,7 @@ def dynamic_form(schema):
         form = form_object()
 
     return render_template('dynamicform.html', form=form, schema=schema, title=title)
+
 
 @frontend.route('/check')
 def check():
@@ -54,6 +58,22 @@ def check():
     return render_template('check.html', data=data_list, title=title)
 
 
+@frontend.route('/edit')
+def edit():
+    schema = session.get('schema', None)
+    schema_json = session.get('schema_json', None)
+    form_object = formfactory(schema_json)
+    data = json.loads(session.get('form_data', None))
+    for k, v in data.items():
+        if "date" in k and v is not None:
+            data[k] = datetime.datetime.strptime(v, '%Y-%m-%d').date()
+
+    title = "Editing the form"
+    form = form_object(**data)
+    print("This is the editing form")
+
+    return render_template('dynamicform.html', form=form, schema=schema, title=title)
+
 
 @frontend.route('/complete')
 def complete():
@@ -66,12 +86,12 @@ def complete():
     return render_template('complete.html', data=csv_data, title=title)
 
 
-
 def update_csv(choice, data):
     data_array = list(data.values())
     with open(f'{choice}.csv', 'a') as csvfile:
         filewriter = csv.writer(csvfile)
         filewriter.writerow(data_array)
+
 
 def last_line_csv_view(file_name):
     with open(f'{file_name}.csv') as csvfile:
@@ -80,6 +100,7 @@ def last_line_csv_view(file_name):
         for row in reversed(list(csv_reader)):
             csv_data.append(', '.join(row))
         return csv_data[0]
+
 
 def remove_dashes(input):
     output = input.replace('-', ' ').capitalize()
