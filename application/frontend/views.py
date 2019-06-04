@@ -2,9 +2,7 @@ import simplejson as simplejson
 import json
 import requests
 import csv
-import re
 import datetime
-from datetime import date
 from flask import Blueprint, session
 from flask import render_template, current_app, url_for, request, redirect
 from application.forms import formfactory
@@ -23,9 +21,8 @@ def index():
 @frontend.route('/<schema>', methods=['GET', 'POST'])
 def dynamic_form(schema):
     schema_url = f"{current_app.config['SCHEMA_URL']}/{schema}-schema.json"
-    file_name = schema_url.split('/')
-    clean_file_name = file_name.pop()[:-12]
-    title = clean_file_name.replace('-', ' ').capitalize()
+    draft_file_name = "draft-" + schema
+    title = schema.replace('-', ' ').capitalize()
     schema_json = requests.get(schema_url).json()
     form_object = formfactory(schema_json)
     session['schema_json'] = schema_json
@@ -36,19 +33,28 @@ def dynamic_form(schema):
         print("Dynamic form is present")
         if form.validate():
             print("Dynamic form is valid!!!!!!!!!!!!!!!")
+            update_csv(draft_file_name, form.data)
+            row_count = sum(1 for row in csv_view(draft_file_name))
+            print(row_count)
             session['form_data'] = simplejson.dumps(form.data, default=str)
-            session['file_name'] = clean_file_name
-            return redirect(url_for('.check'))
+            session['file_name'] = schema
+            return redirect(url_for('frontend.check', schema=schema, row=row_count))
     else:
         form = form_object()
 
     return render_template('dynamicform.html', form=form, schema=schema, title=title)
 
 
-@frontend.route('/check')
-def check():
-    data = json.loads(session.get('form_data', None))
-    title = remove_dashes(session.get('file_name', None))
+@frontend.route('/<schema>/<row>/check')
+def check(schema, row):
+    file_name = "draft-" + schema
+    index = int(float(row)) - 1
+    print(index)
+    csv_data = csv_view(file_name)[index]
+    print(csv_data)
+    data = csv_dict(file_name, index)
+    print(data)
+    title = remove_dashes(schema)
     data_list = []
     for x, y in data.items():
         if x != 'csrf_token':
@@ -81,27 +87,36 @@ def complete():
     file_name = session.get('file_name', None)
     title = remove_dashes(file_name)
     update_csv(file_name, form_data)
-    csv_data = last_line_csv_view(file_name).split()
+    csv_data = csv_view(file_name)[0].split()
 
     return render_template('complete.html', data=csv_data, title=title)
 
 
-def update_csv(choice, data):
+def update_csv(file_name, data):
     data_array = list(data.values())
-    with open(f'{choice}.csv', 'a') as csvfile:
+    with open(f'{file_name}.csv', 'a') as csvfile:
         filewriter = csv.writer(csvfile)
         filewriter.writerow(data_array)
 
 
-def last_line_csv_view(file_name):
+def csv_view(file_name):
     with open(f'{file_name}.csv') as csvfile:
         csv_reader = csv.reader(csvfile, delimiter=',')
         csv_data = []
         for row in reversed(list(csv_reader)):
             csv_data.append(', '.join(row))
-        return csv_data[0]
+        return csv_data
 
 
 def remove_dashes(input):
     output = input.replace('-', ' ').capitalize()
     return output
+
+
+def csv_dict(file_name, index):
+    with open(f'{file_name}.csv', newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        array = []
+        for row in reader:
+            array.append(row)
+        return array[index - 1]
