@@ -35,7 +35,6 @@ def dynamic_form(schema):
             print("Dynamic form is valid!!!!!!!!!!!!!!!")
             update_csv(draft_file_name, form.data)
             row_count = sum(1 for row in csv_view(draft_file_name))
-            print(row_count)
             session['form_data'] = simplejson.dumps(form.data, default=str)
             session['file_name'] = schema
             return redirect(url_for('frontend.check', schema=schema, row=row_count))
@@ -48,12 +47,8 @@ def dynamic_form(schema):
 @frontend.route('/<schema>/<row>/check')
 def check(schema, row):
     file_name = "draft-" + schema
-    index = int(float(row)) - 1
-    print(index)
-    csv_data = csv_view(file_name)[index]
-    print(csv_data)
-    data = csv_dict(file_name, index)
-    print(data)
+    index_number = int(float(row)) - 1
+    data = csv_dict(file_name, index_number)
     title = remove_dashes(schema)
     data_list = []
     for x, y in data.items():
@@ -113,10 +108,10 @@ def remove_dashes(input):
     return output
 
 
-def csv_dict(file_name, index):
+def csv_dict(file_name, index_number):
     with open(f'{file_name}.csv', newline='') as csvfile:
         reader = csv.DictReader(csvfile)
         array = []
         for row in reader:
             array.append(row)
-        return array[index - 1]
+        return array[index_number - 1]
