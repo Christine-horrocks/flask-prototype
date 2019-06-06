@@ -25,9 +25,7 @@ def dynamic_form(schema):
     form_object = formfactory(schema_json)
     if request.method == 'POST':
         form = form_object(obj=request.form)
-        print("Dynamic form is present")
         if form.validate():
-            print("Dynamic form is valid!!!!!!!!!!!!!!!")
             update_csv(draft_file_name, form.data)
             row_count = sum(1 for row in csv_view(draft_file_name))
             return redirect(url_for('frontend.check', schema=schema, row=row_count))
