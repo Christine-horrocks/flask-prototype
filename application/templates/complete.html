@@ -9,12 +9,18 @@
     </div>
 
     <p class="govuk-body">Here is the data</p>
-    <ul class="govuk-list">
+
+    <dl class="govuk-summary-list">
         {% for data_item in data %}
-        <li>
-            {{ data_item }}
-        </li>
-         {% endfor %}
-    </ul>
+        <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">
+                {{ data_item[0]}}
+            </dt>
+            <dd class="govuk-summary-list__value">
+                {{ data_item[1] }}
+            </dd>
+        </div>
+        {% endfor %}
+    </dl>
 
 {% endblock %}

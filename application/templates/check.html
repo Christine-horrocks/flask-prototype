@@ -4,6 +4,14 @@
 
 {% block body %}
 
+<!--<script language="javascript" type="text/javascript">-->
+<!--    var url_pathname = window.location.pathname.split('/')-->
+<!--    var file_name = url_pathname[1]-->
+<!--    var row_number = url_pathname[2]-->
+<!--    var url = file_name + "/" + row_number + "/"-->
+<!--</script>-->
+
+
 <div>
     <h1 class="govuk-heading-xl">{{ title }}</h1>
 </div>
@@ -11,6 +19,7 @@
 <div class="app-prose-scope">
 
     <p class="govuk-body">Hello, would you like to check your input?</p>
+
     <dl class="govuk-summary-list">
         {% for data_item in data %}
         <div class="govuk-summary-list__row">
@@ -23,12 +32,31 @@
         </div>
         {% endfor %}
     </dl>
-    <button onclick="location.href='complete'" type="submit" class="govuk-button">
-        Confirm
-    </button>
+<!--    <button onclick="location.href='complete'"  type="submit" class="govuk-button">-->
+<!--        Confirm-->
+<!--    </button>-->
+
+    <a class="govuk-button" href="{{url_for('frontend.complete', schema=schema)}}" id="test">Confirm</a>
 
     <button onclick="location.href='edit'" type="submit" class="govuk-button">
         Edit
     </button>
 </div>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type=text/javascript>
+        $(function() {
+          $('#test').click(function(e) {
+          console.log('hello')
+          e.preventDefault();
+            $.getJSON('/add_to_csv',
+                function(data) {
+              //do nothing
+            });
+            return false;
+          });
+        });
+</script>
+
 {% endblock %}
+

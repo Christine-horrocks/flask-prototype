@@ -5,6 +5,7 @@ import csv
 import datetime
 from flask import Blueprint, session
 from flask import render_template, current_app, url_for, request, redirect
+from flask import jsonify
 from application.forms import formfactory
 
 frontend = Blueprint('frontend', __name__, template_folder='templates')
@@ -49,6 +50,7 @@ def check(schema, row):
     file_name = "draft-" + schema
     index_number = int(float(row)) - 1
     data = csv_dict(file_name, index_number)
+    print(data)
     title = remove_dashes(schema)
     data_list = []
     for x, y in data.items():
@@ -59,12 +61,20 @@ def check(schema, row):
     return render_template('check.html', data=data_list, title=title)
 
 
-@frontend.route('/edit')
-def edit():
-    schema = session.get('schema', None)
-    schema_json = session.get('schema_json', None)
+@frontend.route('/<schema>/add-to-csv')
+def add_to_csv():
+
+    return jsonify([])
+
+@frontend.route('/<schema>/<row>/edit')
+def edit(schema, row):
+    schema = schema
+    schema_url = f"{current_app.config['SCHEMA_URL']}/{schema}-schema.json"
+    schema_json = requests.get(schema_url).json()
     form_object = formfactory(schema_json)
-    data = json.loads(session.get('form_data', None))
+    file_name = "draft-" + schema
+    index_number = int(float(row)) - 1
+    data = csv_dict(file_name, index_number)
     for k, v in data.items():
         if "date" in k and v is not None:
             data[k] = datetime.datetime.strptime(v, '%Y-%m-%d').date()
@@ -76,15 +86,23 @@ def edit():
     return render_template('dynamicform.html', form=form, schema=schema, title=title)
 
 
-@frontend.route('/complete')
-def complete():
+@frontend.route('/<schema>/complete')
+def complete(schema, row):
     form_data = json.loads(session.get('form_data', None))
-    file_name = session.get('file_name', None)
-    title = remove_dashes(file_name)
-    update_csv(file_name, form_data)
-    csv_data = csv_view(file_name)[0].split()
+    title = remove_dashes(schema)
+    update_csv(schema, form_data)
 
-    return render_template('complete.html', data=csv_data, title=title)
+
+
+    row_count = sum(1 for row in csv_view(schema))
+    data = csv_dict(schema, row_count - 1)
+    data_list = []
+    for x, y in data.items():
+        if x != 'csrf_token':
+            key = remove_dashes(x)
+            data_list.append([key, y])
+
+    return render_template('complete.html', data=data_list, title=title)
 
 
 def update_csv(file_name, data):
