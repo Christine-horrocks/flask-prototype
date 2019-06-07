@@ -1,8 +1,9 @@
+import re
 from flask_wtf import FlaskForm
 from wtforms import StringField, DecimalField, SelectField
 from wtforms.validators import ValidationError, DataRequired, Optional, URL, Email
 from wtforms.fields.html5 import DateField
-import re
+
 
 
 types_to_form_fields = {'string': StringField, 'date': DateField, 'number': DecimalField, 'select': SelectField}

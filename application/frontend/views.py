@@ -40,13 +40,8 @@ def check(schema, row):
     draft_file_name = "draft-" + schema
     index_number = int(float(row)) - 1
     data = csv_dict(draft_file_name, index_number)
-    print(data)
     title = remove_dashes(schema)
-    data_list = []
-    for x, y in data.items():
-        if x != 'csrf_token':
-            key = remove_dashes(x)
-            data_list.append([key, y])
+    data_list = convert_ordered_dicts_for_dl(data)
 
     return render_template('check.html', data=data_list, title=title)
 
@@ -83,13 +78,25 @@ def complete(schema, row):
         update_csv(schema, draft_data)
     row_count = sum(1 for row in csv_view(schema))
     data = csv_dict(schema, row_count - 1)
-    data_list = []
-    for x, y in data.items():
-        if x != 'csrf_token':
-            key = remove_dashes(x)
-            data_list.append([key, y])
+    data_list = convert_ordered_dicts_for_dl(data)
 
-    return render_template('complete.html', data=data_list, title=title, message=message)
+    return render_template('complete.html', data=data_list, title=title, message=message, schema=schema)
+
+
+@frontend.route('/<schema>/table')
+def table(schema):
+    title = remove_dashes(schema)
+    with open(f'{schema}.csv', "rt") as f:
+        reader = csv.reader(f)
+        i = next(reader)
+        rest = [row for row in reader]
+    headings = []
+    for heading in i:
+        headings.append(remove_dashes(heading))
+    entries = []
+    for entry in rest:
+        entries.append(entry[:-1])
+    return render_template('table.html', title=title, headings=headings[:-1], entries=entries)
 
 
 def update_csv(file_name, data):
@@ -123,3 +130,12 @@ def csv_dict(file_name, index_number=None):
             return array[index_number - 1]
         else:
             return array
+
+
+def convert_ordered_dicts_for_dl(data):
+    data_list = []
+    for x, y in data.items():
+        if x != 'csrf_token':
+            key = remove_dashes(x)
+            data_list.append([key, y])
+    return data_list
