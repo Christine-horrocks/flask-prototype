@@ -3,6 +3,7 @@ import csv
 import datetime
 from flask import Blueprint
 from flask import render_template, current_app, url_for, request, redirect
+from application.utils import update_csv, csv_view, remove_dashes, csv_dict, convert_ordered_dicts_for_dl
 from application.forms import formfactory
 
 frontend = Blueprint('frontend', __name__, template_folder='templates')
@@ -98,44 +99,3 @@ def table(schema):
         entries.append(entry[:-1])
     return render_template('table.html', title=title, headings=headings[:-1], entries=entries)
 
-
-def update_csv(file_name, data):
-    data_array = list(data.values())
-    with open(f'{file_name}.csv', 'a') as csvfile:
-        filewriter = csv.writer(csvfile)
-        filewriter.writerow(data_array)
-
-
-def csv_view(file_name):
-    with open(f'{file_name}.csv') as csvfile:
-        csv_reader = csv.reader(csvfile, delimiter=',')
-        csv_data = []
-        for row in reversed(list(csv_reader)):
-            csv_data.append(', '.join(row))
-        return csv_data
-
-
-def remove_dashes(input):
-    output = input.replace('-', ' ').capitalize()
-    return output
-
-
-def csv_dict(file_name, index_number=None):
-    with open(f'{file_name}.csv', newline='') as csvfile:
-        reader = csv.DictReader(csvfile)
-        array = []
-        for row in reader:
-            array.append(row)
-        if index_number is not None:
-            return array[index_number - 1]
-        else:
-            return array
-
-
-def convert_ordered_dicts_for_dl(data):
-    data_list = []
-    for x, y in data.items():
-        if x != 'csrf_token':
-            key = remove_dashes(x)
-            data_list.append([key, y])
-    return data_list
