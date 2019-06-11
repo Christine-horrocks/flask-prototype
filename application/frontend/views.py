@@ -5,6 +5,7 @@ from flask import Blueprint
 from flask import render_template, current_app, url_for, request, redirect
 from application.utils import update_csv, csv_view, remove_dashes, csv_dict, convert_ordered_dicts_for_dl
 from application.forms import formfactory
+from github_contents import GithubContents
 
 frontend = Blueprint('frontend', __name__, template_folder='templates')
 
